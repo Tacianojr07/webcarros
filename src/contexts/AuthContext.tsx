@@ -1,4 +1,7 @@
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useState, useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+
+import { auth } from "../services/firebaseConnection";
 
 interface AuthtProviderProps {
   children: ReactNode;
@@ -6,6 +9,7 @@ interface AuthtProviderProps {
 
 type AuthContextProps = {
   signed: boolean;
+  isLoading: boolean;
 };
 
 interface UserProps {
@@ -18,9 +22,33 @@ export const AuthContext = createContext({} as AuthContextProps);
 
 function AuthProvider({ children }: AuthtProviderProps) {
   const [user, setUser] = useState<UserProps | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        //tem user logado
+        setUser({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+        });
+
+        setIsLoading(false);
+      } else {
+        // não tem user logado
+        setUser(null);
+        setIsLoading(true);
+      }
+    });
+
+    return () => {
+      unsub();
+    };
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ signed: !!user }}>
+    <AuthContext.Provider value={{ signed: !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
