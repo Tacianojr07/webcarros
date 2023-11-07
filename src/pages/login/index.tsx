@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 
 const schema = z.object({
   email: z.string().email("Insira um email válido"),
-  password: z.string().nonempty("a senha não pode ser nula"),
+  password: z.string().nonempty("O campo é obrigatório"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -35,7 +35,7 @@ export function Login() {
         </Link>
 
         <form
-          className="w-full max-w-sm rounded-lg"
+          className="w-full max-w-lg rounded-lg p-4 bg-white"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="mb-3">
@@ -58,8 +58,15 @@ export function Login() {
             />
           </div>
 
-          <button>Acessar</button>
+          <button
+            type="submit"
+            className="w-full bg-zinc-900 text-white font-medium h-10 rounded-lg"
+          >
+            Acessar
+          </button>
         </form>
+
+        <Link to="/register">Ainda não possui uma conta? Cadastra-se</Link>
       </div>
     </Container>
   );
