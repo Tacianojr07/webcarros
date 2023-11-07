@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Container } from "../../components/container";
 import logoImg from "../../assets/logo.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -5,7 +6,11 @@ import { Input } from "../../components/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../../services/firebaseConnection";
 
 const schema = z.object({
@@ -29,6 +34,14 @@ export function Register() {
     resolver: zodResolver(schema),
     mode: "onChange",
   });
+
+  useEffect(() => {
+    async function handleLogOut() {
+      await signOut(auth);
+    }
+
+    handleLogOut();
+  }, []);
 
   async function onSubmit(data: FormData) {
     createUserWithEmailAndPassword(auth, data.email, data.password)

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Container } from "../../components/container";
 import logoImg from "../../assets/logo.svg";
 import { Link } from "react-router-dom";
@@ -5,7 +6,7 @@ import { Input } from "../../components/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../../services/firebaseConnection";
 import { useNavigate } from "react-router-dom";
 
@@ -27,6 +28,14 @@ export function Login() {
     resolver: zodResolver(schema),
     mode: "onChange",
   });
+
+  useEffect(() => {
+    async function handleLogOut() {
+      await signOut(auth);
+    }
+
+    handleLogOut();
+  }, []);
 
   function onSubmit(data: FormData) {
     signInWithEmailAndPassword(auth, data.email, data.password)
