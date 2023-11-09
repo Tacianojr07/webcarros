@@ -40,7 +40,7 @@ function AuthProvider({ children }: AuthtProviderProps) {
       } else {
         // não tem user logado
         setUser(null);
-        setIsLoading(true);
+        setIsLoading(false);
       }
     });
 
