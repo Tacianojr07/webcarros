@@ -1,6 +1,28 @@
 import { Container } from "../../../components/container";
 import { DashboardHeaderl } from "../../../components/painelheader";
+import { Input } from "../../../components/input";
 import { FiUpload } from "react-icons/fi";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const schema = z.object({
+  name: z.string().nonempty("O campo nome é obrigatório"),
+  model: z.string().nonempty("O campo modelo é obrigatório"),
+  year: z.string().nonempty("O campo do ano é obrigatório"),
+  km: z.string().nonempty("O campo do KM é obrigatório"),
+  price: z.string().nonempty("O campo do preço é obrigatório"),
+  city: z.string().nonempty("O campo do cidade é obrigatório"),
+  whatsapp: z
+    .string()
+    .nonempty("O campo do whatsapp é obrigatório")
+    .refine((value) => /^(\d{10,11})$/.test(value), {
+      message: "O número de telefone é inválido",
+    }),
+  description: z.string().nonempty("O campo de descrição é obrigatório"),
+});
+
+type FormData = z.infer<typeof schema>;
 
 export function New() {
   return (
