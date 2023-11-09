@@ -10,6 +10,8 @@ interface AuthtProviderProps {
 type AuthContextProps = {
   signed: boolean;
   isLoading: boolean;
+  handleInfo: ({ name, uid, email }: UserProps) => void;
+  user: UserProps | null;
 };
 
 interface UserProps {
@@ -47,8 +49,18 @@ function AuthProvider({ children }: AuthtProviderProps) {
     };
   }, []);
 
+  function handleInfo({ name, uid, email }: UserProps) {
+    setUser({
+      name: name,
+      email: email,
+      uid: uid,
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ signed: !!user, isLoading }}>
+    <AuthContext.Provider
+      value={{ signed: !!user, isLoading, handleInfo, user }}
+    >
       {children}
     </AuthContext.Provider>
   );
