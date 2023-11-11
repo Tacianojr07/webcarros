@@ -2,7 +2,7 @@ import { ChangeEvent, useContext, useState } from "react";
 import { Container } from "../../../components/container";
 import { DashboardHeaderl } from "../../../components/painelheader";
 import { Input } from "../../../components/input";
-import { FiUpload } from "react-icons/fi";
+import { FiTrash, FiUpload } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -97,6 +97,19 @@ export function New() {
     });
   }
 
+  async function handleDeleteImage(item: ImageProps) {
+    const imagePath = `images/${item.uid}/${item.name}`;
+
+    const imageRef = ref(storage, imagePath);
+
+    try {
+      await deleteObject(imageRef);
+      setCarImages(carImage.filter((car) => car.url !== item.url));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <Container>
       <DashboardHeaderl />
@@ -120,6 +133,12 @@ export function New() {
             key={item.name}
             className="flex justify-center items-center w-full h-32 relative"
           >
+            <button
+              className="absolute"
+              onClick={() => handleDeleteImage(item)}
+            >
+              <FiTrash size={28} color="#FFF" />
+            </button>
             <img
               src={item.previewURL}
               className="rounded-lg w-full h-32 object-cover"
