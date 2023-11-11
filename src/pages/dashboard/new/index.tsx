@@ -34,7 +34,15 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+interface ImageProps {
+  uid: string;
+  name: string;
+  previewURL: string;
+  url: string;
+}
+
 export function New() {
+  const [carImage, setCarImages] = useState<ImageProps[]>([]);
   const { user } = useContext(AuthContext);
 
   const {
@@ -77,7 +85,14 @@ export function New() {
 
     uploadBytes(uploadRef, image).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((downloadLoadUrl) => {
-        console.log(downloadLoadUrl);
+        const imageItem = {
+          name: uidImage,
+          uid: currentUid,
+          previewURL: URL.createObjectURL(image),
+          url: downloadLoadUrl,
+        };
+
+        setCarImages((images) => [...images, imageItem]);
       });
     });
   }
@@ -99,6 +114,19 @@ export function New() {
             />
           </div>
         </button>
+
+        {carImage.map((item) => (
+          <div
+            key={item.name}
+            className="flex justify-center items-center w-full h-32 relative"
+          >
+            <img
+              src={item.previewURL}
+              className="rounded-lg w-full h-32 object-cover"
+              alt="foto do carro"
+            />
+          </div>
+        ))}
       </div>
 
       <div className="w-full bg-white flex flex-col p-3 rounded-lg mb-3 sm:flex-row items-center gap-3 mt-4">
