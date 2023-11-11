@@ -8,6 +8,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { v4 as uuidV4 } from "uuid";
+import { storage } from "../../../services/firebaseConnection";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 
 const schema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
@@ -44,11 +51,12 @@ export function New() {
     console.log(data);
   }
 
-  function handleFiles(e: ChangeEvent<HTMLInputElement>) {
+  async function handleFiles(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
       const image = e.target.files[0];
       if (image.type === "image/jpeg" || image.type === "image/png") {
         //enviar pro banco
+        await handleUpload(image);
       } else {
         alert("Envie uma imagem JPEG ou PNG");
         return;
@@ -56,19 +64,27 @@ export function New() {
     }
   }
 
-  async function handleUpload() {
+  async function handleUpload(image: File) {
     if (!user?.uid) {
       return;
     }
 
-    const useId = user?.uid;
+    const currentUid = user?.uid;
     const uidImage = uuidV4();
+
+    const uploadRef = ref(storage, `images/${currentUid}/${uidImage}`);
+    uploadBytes(uploadRef, image);
+
+    uploadBytes(uploadRef, image).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((downloadLoadUrl) => {
+        console.log(downloadLoadUrl);
+      });
+    });
   }
 
   return (
     <Container>
       <DashboardHeaderl />
-
       <div className="w-full bg-white rounded-lg p-3 flex flex-col  sm:flex-row items-center gap-3">
         <button className="w-48 border-2 flex items-center justify-center rounded-lg cursor-pointer border-gray-600 h-32 md:48">
           <div className="absolute cursor-pointer">
