@@ -8,13 +8,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { v4 as uuidV4 } from "uuid";
-import { storage } from "../../../services/firebaseConnection";
+import { storage, db } from "../../../services/firebaseConnection";
 import {
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { addDoc, collection } from "firebase/firestore";
 
 const schema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
@@ -25,11 +26,11 @@ const schema = z.object({
   city: z.string().nonempty("O campo da cidade é obrigatório"),
   whatsapp: z
     .string()
-
+    .min(1, "O telefone é obrigatório")
     .refine((value) => /^(\d{10,11})$/.test(value), {
       message: "O número de telefone é inválido",
     }),
-  description: z.string().nonempty("O campo de descrição é obrigatório"),
+  description: z.string(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -56,7 +57,40 @@ export function New() {
   });
 
   function onSubmit(data: FormData) {
-    console.log(data);
+    if (carImage.length === 0) {
+      alert("envie ao menos uma foto do carro");
+      return;
+    }
+    const carListUrl = carImage.map((car) => {
+      return {
+        uid: car.uid,
+        name: car.name,
+        url: car.url,
+      };
+    });
+
+    addDoc(collection(db, "cars"), {
+      name: data.name,
+      model: data.model,
+      whatsapp: data.whatsapp,
+      city: data.city,
+      year: data.year,
+      km: data.km,
+      price: data.price,
+      description: data.description,
+      date: new Date(),
+      owner: user?.name,
+      uid: user?.uid,
+      images: carListUrl,
+    })
+      .then(() => {
+        reset();
+        setCarImages([]);
+        console.log("cadastrado");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   async function handleFiles(e: ChangeEvent<HTMLInputElement>) {
@@ -149,7 +183,7 @@ export function New() {
       </div>
 
       <div className="w-full bg-white flex flex-col p-3 rounded-lg mb-3 sm:flex-row items-center gap-3 mt-4">
-        <form className="w-full" onClick={handleSubmit(onSubmit)}>
+        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
             <p className="font-medium">Nome do carro</p>
             <Input
