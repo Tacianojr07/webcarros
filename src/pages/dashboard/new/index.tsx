@@ -1,3 +1,4 @@
+import { ChangeEvent, useContext, useState } from "react";
 import { Container } from "../../../components/container";
 import { DashboardHeaderl } from "../../../components/painelheader";
 import { Input } from "../../../components/input";
@@ -5,6 +6,8 @@ import { FiUpload } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { v4 as uuidV4 } from "uuid";
 
 const schema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
@@ -25,6 +28,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function New() {
+  const { user } = useContext(AuthContext);
+
   const {
     register,
     handleSubmit,
@@ -37,6 +42,27 @@ export function New() {
 
   function onSubmit(data: FormData) {
     console.log(data);
+  }
+
+  function handleFiles(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files[0]) {
+      const image = e.target.files[0];
+      if (image.type === "image/jpeg" || image.type === "image/png") {
+        //enviar pro banco
+      } else {
+        alert("Envie uma imagem JPEG ou PNG");
+        return;
+      }
+    }
+  }
+
+  async function handleUpload() {
+    if (!user?.uid) {
+      return;
+    }
+
+    const useId = user?.uid;
+    const uidImage = uuidV4();
   }
 
   return (
@@ -53,6 +79,7 @@ export function New() {
               type="file"
               accept="image/*"
               className="opacity-0 cursor-pointer"
+              onChange={handleFiles}
             />
           </div>
         </button>
