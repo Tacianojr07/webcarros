@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { Container } from "../../components/container";
 import { DashboardHeaderl } from "../../components/painelheader";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
 import { db } from "../../services/firebaseConnection";
+import { AuthContext } from "../../contexts/AuthContext";
 
 interface CarProps {
   id: string;
@@ -23,11 +24,11 @@ interface CarImageProps {
 }
 export function Dashboard() {
   const [car, setCar] = useState<CarProps[]>([]);
-
+  const { user } = useContext(AuthContext);
   useEffect(() => {
     function loadCards() {
       const carsRef = collection(db, "cars");
-      const queryRef = query(carsRef, orderBy("date", "desc"));
+      const queryRef = query(carsRef, where("uid", "==", user?.uid));
 
       getDocs(queryRef).then((snapshot) => {
         const carList = [] as CarProps[];

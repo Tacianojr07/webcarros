@@ -92,7 +92,7 @@ export function Home() {
                   display: loadImages.includes(item.id) ? "block" : "none",
                 }}
               />
-              <p className="font-bold mt-1 mb-2 px-2">{item.price}</p>
+              <p className="font-bold mt-1 mb-2 px-2">{item.name}</p>
               <div className="flex flex-col px-2">
                 <span className="text-zinc-700 mb-7 ">
                   {item.year} | {item.km} KM
