@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Container } from "../../components/container";
 import { collection, query, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../../services/firebaseConnection";
+import { Link } from "react-router-dom";
 
 interface CarProps {
   id: string;
@@ -11,7 +12,7 @@ interface CarProps {
   uid: string;
   city: string;
   price: string | number;
-  carImages: CarImageProps[];
+  images: CarImageProps[];
 }
 
 interface CarImageProps {
@@ -22,6 +23,7 @@ interface CarImageProps {
 
 export function Home() {
   const [car, setCar] = useState<CarProps[]>([]);
+  const [loadImages, setLoadImages] = useState<string[]>([]);
 
   useEffect(() => {
     function loadCards() {
@@ -39,17 +41,21 @@ export function Home() {
             km: doc.data().km,
             price: doc.data().price,
             city: doc.data().city,
-            carImages: doc.data().carImages,
+            images: doc.data().images,
             uid: doc.data().uid,
           });
         });
-
+        console.log(carList);
         setCar(carList);
       });
     }
 
     loadCards();
   }, []);
+
+  function handleLoadImage(id: string) {
+    setLoadImages((imagesPreview) => [...imagesPreview, id]);
+  }
 
   return (
     <Container>
@@ -69,28 +75,29 @@ export function Home() {
 
       <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {car.map((item) => (
-          <section key={item.id} className="w-full bg-white rounded-lg">
-            <img
-              className="w-full rounded-lg mb-2 max-h-72 hover:scale-105 cursor-pointer transition-all "
-              src="https://image.webmotors.com.br/_fotos/anunciousados/gigante/2023/202310/20231026/honda-civic-2.0-16v-flexone-exl-4p-cvt-wmimagem15252259135.jpg?s=fill&w=552&h=414&q=60"
-              alt="carro"
-            />
-
-            <p className="font-bold mt-1 mb-2 px-2">CIVIC</p>
-
-            <div className="flex flex-col px-2">
-              <span className="text-zinc-700 mb-7 ">Ano 2016 | 23.000 KM</span>
-              <strong className="text-black text-xl font-medium">
-                R$ 190.000
-              </strong>
-
-              <div className="w-full h-px bg-slate-300 my-2"></div>
-
-              <div className="px-2 pb-2">
-                <span className="text-black">Toritama-PE</span>
+          <Link key={item.id} to={`car/${item.id}`}>
+            <section className="w-full bg-white rounded-lg">
+              <img
+                className="w-full rounded-lg mb-2 max-h-72 hover:scale-105 cursor-pointer transition-all "
+                src={item.images[0].url}
+                alt="carros"
+                onLoad={() => handleLoadImage(item.id)}
+              />
+              <p className="font-bold mt-1 mb-2 px-2">{item.price}</p>
+              <div className="flex flex-col px-2">
+                <span className="text-zinc-700 mb-7 ">
+                  {item.year} | {item.km} KM
+                </span>
+                <strong className="text-black text-xl font-medium">
+                  R$ {item.price}
+                </strong>
+                <div className="w-full h-px bg-slate-300 my-2"></div>
+                <div className="px-2 pb-2">
+                  <span className="text-black">{item.city}</span>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </Link>
         ))}
       </main>
     </Container>
