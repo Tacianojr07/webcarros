@@ -1,15 +1,67 @@
+import { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { Container } from "../../components/container";
 import { DashboardHeaderl } from "../../components/painelheader";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { db } from "../../services/firebaseConnection";
 
+interface CarProps {
+  id: string;
+  name: string;
+  year: string;
+  km: string;
+  uid: string;
+  city: string;
+  price: string | number;
+  images: CarImageProps[];
+}
+
+interface CarImageProps {
+  name: string;
+  uid: string;
+  url: string;
+}
 export function Dashboard() {
+  const [car, setCar] = useState<CarProps[]>([]);
+
+  useEffect(() => {
+    function loadCards() {
+      const carsRef = collection(db, "cars");
+      const queryRef = query(carsRef, orderBy("date", "desc"));
+
+      getDocs(queryRef).then((snapshot) => {
+        const carList = [] as CarProps[];
+
+        snapshot.forEach((doc) => {
+          carList.push({
+            id: doc.id,
+            name: doc.data().name,
+            year: doc.data().year,
+            km: doc.data().km,
+            price: doc.data().price,
+            city: doc.data().city,
+            images: doc.data().images,
+            uid: doc.data().uid,
+          });
+        });
+        console.log(carList);
+        setCar(carList);
+      });
+    }
+
+    loadCards();
+  }, []);
+
   return (
     <Container>
       <DashboardHeaderl />
 
       <main className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <section className="w-full bg-white rounded-lg relative">
-          <button className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center right-2 top-2 drop-shadow-sm">
+          <button
+            onClick={() => {}}
+            className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center right-2 top-2 drop-shadow-sm"
+          >
             <FiTrash2 size={26} color="#000" />
           </button>
           <img
