@@ -27,7 +27,7 @@ export function Dashboard() {
   const { user } = useContext(AuthContext);
   useEffect(() => {
     function loadCards() {
-      if (!user) {
+      if (!user?.uid) {
         return;
       }
       const carsRef = collection(db, "cars");
