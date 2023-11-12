@@ -77,11 +77,20 @@ export function Home() {
         {car.map((item) => (
           <Link key={item.id} to={`car/${item.id}`}>
             <section className="w-full bg-white rounded-lg">
+              <div
+                className="w-full h-72 bg-slate-200"
+                style={{
+                  display: loadImages.includes(item.id) ? "none" : "block",
+                }}
+              ></div>
               <img
                 className="w-full rounded-lg mb-2 max-h-72 hover:scale-105 cursor-pointer transition-all "
                 src={item.images[0].url}
                 alt="carros"
                 onLoad={() => handleLoadImage(item.id)}
+                style={{
+                  display: loadImages.includes(item.id) ? "block" : "none",
+                }}
               />
               <p className="font-bold mt-1 mb-2 px-2">{item.price}</p>
               <div className="flex flex-col px-2">
