@@ -2,8 +2,15 @@ import { useEffect, useState, useContext } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { Container } from "../../components/container";
 import { DashboardHeaderl } from "../../components/painelheader";
-import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
-import { db } from "../../services/firebaseConnection";
+import {
+  collection,
+  query,
+  getDocs,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db, storage } from "../../services/firebaseConnection";
 import { AuthContext } from "../../contexts/AuthContext";
 
 interface CarProps {
@@ -54,7 +61,14 @@ export function Dashboard() {
     }
 
     loadCards();
-  }, []);
+  }, [user?.uid]);
+
+  async function handleDeleteCar(id: string) {
+    const docRef = doc(db, "cars", id);
+    await deleteDoc(docRef);
+
+    setCar(car.filter((cars) => cars.id !== id));
+  }
 
   return (
     <Container>
@@ -63,11 +77,11 @@ export function Dashboard() {
       <main className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {car.map((cars) => (
           <section
-            key={cars.uid}
+            key={cars.id}
             className="w-full bg-white rounded-lg relative"
           >
             <button
-              onClick={() => {}}
+              onClick={() => handleDeleteCar(cars.id)}
               className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center right-2 top-2 drop-shadow-sm"
             >
               <FiTrash2 size={26} color="#000" />
