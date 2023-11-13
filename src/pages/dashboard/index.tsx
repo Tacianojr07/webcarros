@@ -11,6 +11,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db, storage } from "../../services/firebaseConnection";
+import { ref, deleteObject } from "firebase/storage";
 import { AuthContext } from "../../contexts/AuthContext";
 
 interface CarProps {
@@ -63,11 +64,25 @@ export function Dashboard() {
     loadCards();
   }, [user?.uid]);
 
-  async function handleDeleteCar(id: string) {
-    const docRef = doc(db, "cars", id);
+  async function handleDeleteCar(newCar: CarProps) {
+    //deleta do banco
+    const docRef = doc(db, "cars", newCar.id);
     await deleteDoc(docRef);
 
-    setCar(car.filter((cars) => cars.id !== id));
+    newCar.images.map(async (image) => {
+      //deleta do strorage
+      const imagePath = `images/${image.uid}/${image.name}`;
+      const imageRef = ref(storage, imagePath);
+
+      try {
+        await deleteObject(imageRef);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    //retira do useState
+    setCar(car.filter((cars) => cars.id !== newCar.id));
   }
 
   return (
@@ -81,7 +96,7 @@ export function Dashboard() {
             className="w-full bg-white rounded-lg relative"
           >
             <button
-              onClick={() => handleDeleteCar(cars.id)}
+              onClick={() => handleDeleteCar(cars)}
               className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center right-2 top-2 drop-shadow-sm"
             >
               <FiTrash2 size={26} color="#000" />
